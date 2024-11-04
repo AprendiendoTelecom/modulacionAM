@@ -1,35 +1,55 @@
-%Programa que modula una senoidal y muestra la seÒal modulada en AM, la portadora y la moduladora en una misma ventana
+%Programa que modula una senoidal y muestra la se√±al modulada en AM, la portadora y la moduladora en una misma ventana
 
-fs = 400; %Frecuencia de muestreo
-Ec = 5; %Voltaje pico de la portadora
-fc = 20; %Frecuencia de la portadora
-fm = 1; %Freceuncia de la moduladora
-m = 0.8; %Indice de modulaciÛn
+%Pide al usuario que ingrese los valores de amplitud y frecuencia de la portadora y de la moduladora.
+%As√≠ como el n√∫mero de ciclos que se van a mostrar en la gr√°fica
+M = input("Ingrese la amplitud de la moduladora: ");
+fm = input("Ingrese la freceuncia de la moduladora: "); 
+A = input("Ingrese la amplitud de la portadora: "); 
+fc = input("Ingrese la frecuencia de la portadora: ");
+Nc = input("Ingrese el n√∫mero de ciclos que se mostrar√°n en la gr√°fica: ");
 
-Nc = 5; %N˙mero de ciclos que se mostrar· en la gr·fica
-t = 0:1/fs:(Nc/fm); %Vector de tiempo
+%El √≠ndice de modulaci√≥n se calcula como el cociente entre la amplitud de la moduladora y la amplitud de la portadora 
+m = M/A;
 
-%Ciclo que se utiliza para marcar el lÌmite del eje X de la gr·fica
-set(gcf, 'Position',  [50, 50, 1800, 900]) %Indica la posiciÛn y tamaÒa de la ventana. 
-h = animatedline('Color', 'w');xlabel("Tiempo"); ylabel("Amplitud");grid on
-t2 = 1:1:Nc
-for k= 1:length(t2)    
-    l = -2*Ec;
+%Se calcula la frecuencia de muestreo como 15 veces el valor de la frecuencia de la se√±al portadora 
+fs = 15*fc;
+
+%Crea el eje del tiempo utilizando los valores ingresados
+%El limite superior del eje horizontal se guarda en una variable para evitar errores
+xlim_sup = Nc/fm;
+t = 0:1/fs:xlim_sup;
+
+%Gr√°fica continua con t√≠tulo, etiquetas de eje y l√≠mites de los ejes
+set(gcf, 'Position',  [0, 200, 1600, 800])
+xlabel("Tiempo"); ylabel("Amplitud");title("Modulaci√≥n AM");ylim([-2*A 5*A+M]);grid on 
+
+%Ciclo que se utiliza para graficar el l√≠mite del eje X
+t2 = 0:1/fm:Nc/fm;
+h = animatedline('Color', 'k');
+for k = 1:length(t2)    
+    l = -2*A;
     addpoints(h,t2(k),l);    
     drawnow
 end
 
-%Utilizando la funciÛn drawnow se crea la gr·fica durante la ejecuciÛn del programa. Se agrega un offset para poder visualizar las 3 gr·ficas en la misma ventana 
+%Primero se determinan los colores y las leyendas de las 3 gr√°ficas
 h1 = animatedline('Color', 'b');
 h2 = animatedline('Color', 'r');
 h3 = animatedline('Color', 'k');
-legend('Portadora', 'Moduladora','SeÒal AM') %Leyendas de las gr·ficas
+legend([h1,h2,h3],'Portadora', 'Moduladora','Se√±al AM')
+%Con ayuda del a funci√≥n drawnow y un ciclo se crean las 3 gr√°ficas durante la ejecuci√≥n del programa
 for k= 1:length(t)
-    Vc = Ec*sin(2*pi*fc*t(k)); %SeÒal portadora
-    Vmod = Ec*sin(2*pi*fm*t(k)); %SeÒal moduladora
-    Vam = (1 + m*sin(2*pi*fm*t(k)))*Ec*sin(2*pi*fc*t(k)); %SeÒal modulada en AM
-    addpoints(h1,t(k),(5*Ec)+Vc); %Gr·fica de la seÒal portadora
-    addpoints(h2,t(k),(3*Ec)+Vmod); %Gr·fica de la seÒal moduladora
-    addpoints(h3,t(k),Vam); %Gr·fica de la seÒal modulada
+    Vc = A*sin(2*pi*fc*t(k)); %Se√±al portadora
+    Vmod = M*sin(2*pi*fm*t(k)); %Se√±al moduladora
+    Vam = (1 + Vmod/A)*Vc; %Se√±al modulada en AM
+    
+    %Se agrega un offset para poder visualizar las 3 gr√°ficas en la misma ventana
+    addpoints(h1,t(k), 4*A+M+Vc); %Gr√°fica de la se√±al portadora
+    addpoints(h2,t(k), 2*A+M+Vmod); %Gr√°fica de la se√±al moduladora
+    addpoints(h3,t(k),Vam); %Gr√°fica de la se√±al modulada
     drawnow
 end
+
+%Crea y muestra un texto que resume los datos de la gr√°fica
+X = sprintf('\nMODULACION AM\nAmplitud de Moduladora: %d[V]\nFrecuencia de Moduladora: %d[Hz]\nAmplitud de portadora: %d[V]\nFrecuencia de portadora: %d[Hz]\nIndice de modulaci√≥n: %.2f\nCiclos mostrados: %d\n',M,fm,A,fc,m,Nc);
+disp(X)
